@@ -17,3 +17,18 @@
 ## How to Run
 ```bash
 uvicorn app.main:app --reload
+
+
+
+
+---
+
+# 🚀 Next Step
+
+Once pushed, tell me:
+
+👉 **“github done”**
+
+Then we’ll start:
+
+🔥 Frontend (React) — the fun part begins 😄
