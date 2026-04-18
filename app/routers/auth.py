@@ -12,6 +12,7 @@ router = APIRouter()
 @router.get("/create-admin")
 def create_admin(db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == "admin@example.com").first()
+
     if existing:
         return {"message": "Admin already exists"}
 
@@ -21,8 +22,10 @@ def create_admin(db: Session = Depends(get_db)):
         hashed_password=hash_password("admin123"),
         role="admin"
     )
+
     db.add(admin)
     db.commit()
+
     return {"message": "Admin created"}
 
 
