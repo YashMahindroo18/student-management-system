@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -16,7 +16,8 @@ function AdminDashboard() {
 
   const navigate = useNavigate();
 
-  const fetchStudents = async () => {
+  // ✅ FIX: wrap in useCallback
+  const fetchStudents = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
 
@@ -30,7 +31,7 @@ function AdminDashboard() {
     } catch {
       navigate("/");
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -41,7 +42,7 @@ function AdminDashboard() {
     }
 
     fetchStudents();
-  }, [navigate]);
+  }, [fetchStudents, navigate]); // ✅ FIXED dependency
 
   const handleCreate = async () => {
     try {
