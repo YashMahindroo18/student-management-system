@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
+const API = process.env.REACT_APP_API_URL;
+
 function StudentDashboard() {
   const [data, setData] = useState(null);
   const navigate = useNavigate();
@@ -17,17 +19,14 @@ function StudentDashboard() {
 
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(
-          "http://127.0.0.1:8000/student/profile",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get(`${API}/student/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         setData(res.data);
-      } catch (err) {
+      } catch {
         navigate("/");
       }
     };
@@ -45,12 +44,10 @@ function StudentDashboard() {
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">My Profile</h2>
 
-          <div className="space-y-2">
-            <p><b>Email:</b> {data.email}</p>
-            <p><b>Roll Number:</b> {data.roll_number}</p>
-            <p><b>Department:</b> {data.department}</p>
-            <p><b>Year:</b> {data.year}</p>
-          </div>
+          <p><b>Email:</b> {data.email}</p>
+          <p><b>Roll Number:</b> {data.roll_number}</p>
+          <p><b>Department:</b> {data.department}</p>
+          <p><b>Year:</b> {data.year}</p>
         </div>
       </div>
     </div>

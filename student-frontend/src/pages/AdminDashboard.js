@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 
+const API = process.env.REACT_APP_API_URL;
+
 function AdminDashboard() {
   const [students, setStudents] = useState([]);
   const [form, setForm] = useState({
@@ -18,14 +20,11 @@ function AdminDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        "http://127.0.0.1:8000/admin/students",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.get(`${API}/admin/students`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setStudents(res.data);
     } catch {
@@ -49,7 +48,7 @@ function AdminDashboard() {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        "http://127.0.0.1:8000/admin/students",
+        `${API}/admin/students`,
         {
           ...form,
           year: Number(form.year),
@@ -79,8 +78,6 @@ function AdminDashboard() {
       <Navbar role="admin" />
 
       <div className="p-6 max-w-4xl mx-auto">
-
-        {/* CREATE FORM */}
         <div className="bg-white p-4 rounded shadow mb-6">
           <h2 className="font-bold mb-3">Create Student</h2>
 
@@ -110,7 +107,6 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {/* STUDENT LIST */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="font-bold mb-3">Students</h2>
 
@@ -136,7 +132,6 @@ function AdminDashboard() {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   );
