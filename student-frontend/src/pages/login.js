@@ -46,7 +46,7 @@ function Login() {
       }}
     >
       {/* Overlay */}
-      <div className="absolute inset-0 bg-white/60 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]"></div>
 
       {/* Card */}
       <div className="relative bg-white/80 backdrop-blur-lg p-8 rounded-2xl shadow-xl w-[350px] text-center">
