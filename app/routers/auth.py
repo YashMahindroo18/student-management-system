@@ -9,6 +9,24 @@ from app.core.security import hash_password, verify_password, create_access_toke
 router = APIRouter()
 
 
+@router.get("/create-admin")
+def create_admin(db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == "admin@example.com").first()
+    if existing:
+        return {"message": "Admin already exists"}
+
+    admin = User(
+        name="Admin",
+        email="admin@example.com",
+        hashed_password=hash_password("admin123"),
+        role="admin"
+    )
+    db.add(admin)
+    db.commit()
+    return {"message": "Admin created"}
+
+
+# ✅ FIXED ACTIVATION
 @router.post("/activate")
 def activate_account(data: ActivateUser, db: Session = Depends(get_db)):
     student = db.query(Student).filter(Student.email == data.email).first()
@@ -38,15 +56,20 @@ def activate_account(data: ActivateUser, db: Session = Depends(get_db)):
     return {"message": "Account activated successfully"}
 
 
+# ✅ FIXED LOGIN
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
-    student = db.query(Student).filter(Student.email == user.email).first()
 
-    if not student or not student.is_active:
-        raise HTTPException(status_code=403, detail="Account not activated")
     if not db_user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    # 🔹 Only check activation for students
+    if db_user.role == "student":
+        student = db.query(Student).filter(Student.email == user.email).first()
+
+        if not student or not student.is_active:
+            raise HTTPException(status_code=403, detail="Account not activated")
 
     if not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
