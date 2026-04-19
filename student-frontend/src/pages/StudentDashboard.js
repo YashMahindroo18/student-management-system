@@ -204,7 +204,7 @@ function StudentDashboard() {
               className="bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-200 rounded-2xl p-6 flex flex-col justify-between"
             >
               <p className="text-pink-100 font-medium text-sm tracking-wide uppercase">Current Semester</p>
-              <h2 className="text-4xl font-extrabold mt-2">{semester}</h2>
+              <h2 className="text-4xl font-extrabold mt-2">{3}</h2>
             </motion.div>
           </motion.div>
 
