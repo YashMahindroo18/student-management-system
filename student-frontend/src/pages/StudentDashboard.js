@@ -8,6 +8,7 @@ const API = process.env.REACT_APP_API_URL;
 function StudentDashboard() {
   const [data, setData] = useState(null);
   const [marks, setMarks] = useState([]);
+  const [activeTab, setActiveTab] = useState("profile"); // 🟢 NEW
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,45 +57,76 @@ function StudentDashboard() {
 
       <div className="p-6 flex flex-col items-center gap-6">
 
-        {/* PROFILE CARD */}
-        <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6 w-full max-w-md">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            My Profile
-          </h2>
+        {/* 🔹 TABS */}
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`px-4 py-2 rounded-full ${
+              activeTab === "profile"
+                ? "bg-blue-400 text-white"
+                : "bg-white shadow"
+            }`}
+          >
+            Profile
+          </button>
 
-          <div className="space-y-2 text-gray-600">
-            <p><b>Email:</b> {data.email}</p>
-            <p><b>Roll Number:</b> {data.roll_number}</p>
-            <p><b>Department:</b> {data.department}</p>
-            <p><b>Year:</b> {data.year}</p>
-          </div>
+          <button
+            onClick={() => setActiveTab("marks")}
+            className={`px-4 py-2 rounded-full ${
+              activeTab === "marks"
+                ? "bg-green-400 text-white"
+                : "bg-white shadow"
+            }`}
+          >
+            Marks
+          </button>
         </div>
 
-        {/* MARKS CARD */}
-        <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6 w-full max-w-md">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">
-            My Marks
-          </h2>
+        {/* 🔹 CONTENT */}
+        <div className="w-full max-w-md">
 
-          {marks.length === 0 ? (
-            <p className="text-gray-500">No marks available</p>
-          ) : (
-            <ul className="space-y-2">
-              {marks.map((m, i) => (
-                <li
-                  key={i}
-                  className="flex justify-between bg-white p-2 rounded-lg shadow-sm"
-                >
-                  <span>{m.subject}</span>
-                  <span className="font-semibold text-blue-500">
-                    {m.score}
-                  </span>
-                </li>
-              ))}
-            </ul>
+          {/* PROFILE */}
+          {activeTab === "profile" && (
+            <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                My Profile
+              </h2>
+
+              <p><b>Email:</b> {data.email}</p>
+              <p><b>Roll Number:</b> {data.roll_number}</p>
+              <p><b>Department:</b> {data.department}</p>
+              <p><b>Year:</b> {data.year}</p>
+            </div>
           )}
-        </div>
 
+          {/* MARKS */}
+          {activeTab === "marks" && (
+            <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                My Marks
+              </h2>
+
+              {marks.length === 0 ? (
+                <p>No marks available</p>
+              ) : (
+                <ul className="space-y-2">
+                  {marks.map((m, i) => (
+                    <li
+                      key={i}
+                      className="flex justify-between bg-white p-2 rounded-lg shadow-sm"
+                    >
+                      <span>{m.subject}</span>
+                      <span className="font-semibold text-blue-500">
+                        {m.score}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   );
