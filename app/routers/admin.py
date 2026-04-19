@@ -100,6 +100,8 @@ def activate_student(
         raise HTTPException(status_code=404, detail="Student not found")
 
     student.is_active = True
-    db.commit()
 
-    return {"message": "Student activated"}
+    db.commit()          # ✅ VERY IMPORTANT
+    db.refresh(student)  # ✅ ALSO IMPORTANT
+
+    return student
