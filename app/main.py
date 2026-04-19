@@ -19,6 +19,7 @@ app.add_middleware(
 
 # ✅ Create tables (keep this, but DO NOT use drop_all)
 Base.metadata.create_all(bind=engine)
+Base.metadata.drop_all(bind=engine)
    # 🔴 ADD THIS
 
 # ✅ Include routers
