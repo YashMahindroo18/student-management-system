@@ -5,6 +5,8 @@ from app.utils.dependencies import require_role
 from app.db.database import get_db
 from app.db.models import Student
 from app.db.models import Mark
+from app.db.models import Timetable
+from app.schemas.timetable import TimetableResponse
 router = APIRouter()
 
 
@@ -35,3 +37,16 @@ def get_marks(
 ):
     marks = db.query(Mark).filter(Mark.student_email == user.email).all()
     return marks
+@router.get("/timetable", response_model=list[TimetableResponse])
+def get_timetable(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("student"))
+):
+    student = db.query(Student).filter(Student.email == user.email).first()
+
+    timetable = db.query(Timetable).filter(
+        Timetable.year == student.year,
+        Timetable.section == "A"   # fixed for now
+    ).all()
+
+    return timetable

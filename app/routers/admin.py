@@ -7,6 +7,8 @@ from app.schemas.student import StudentCreate, StudentResponse
 from app.utils.dependencies import require_role
 from app.db.models import Mark
 from app.schemas.mark import MarkCreate, MarkResponse
+from app.db.models import Timetable
+from app.schemas.timetable import TimetableCreate, TimetableResponse
 
 router = APIRouter()
 
@@ -53,3 +55,25 @@ def add_marks(
     db.refresh(mark)
 
     return mark
+@router.post("/timetable", response_model=TimetableResponse)
+def add_timetable(
+    data: TimetableCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    entry = Timetable(**data.dict())
+
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+
+    return entry
+@router.delete("/timetable")
+def clear_timetable(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    db.query(Timetable).delete()
+    db.commit()
+
+    return {"message": "Timetable cleared"}
