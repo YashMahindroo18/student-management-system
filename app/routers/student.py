@@ -26,14 +26,12 @@ def student_profile(
     }
 
 
-@router.get("/dashboard")
-def student_dashboard(user=Depends(require_role("student"))):
-    return {"message": f"Welcome {user.name}"}
-@router.get("/marks", response_model=list[dict])
+from app.schemas.mark import MarkResponse
+
+@router.get("/marks", response_model=list[MarkResponse])
 def get_marks(
     db: Session = Depends(get_db),
     user=Depends(require_role("student"))
 ):
     marks = db.query(Mark).filter(Mark.student_email == user.email).all()
-
     return marks

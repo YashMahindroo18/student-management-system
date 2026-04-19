@@ -31,7 +31,22 @@ function StudentDashboard() {
       }
     };
 
+
     fetchProfile();
+    const [marks, setMarks] = useState([]);
+    const fetchMarks = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(`${API}/student/marks`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setMarks(res.data);
+  } catch {}
+};
   }, [navigate]);
 
   if (!data) return <p className="text-center mt-10">Loading...</p>;
