@@ -45,11 +45,13 @@ def get_marks(
     result = []
 
     for m in marks:
+        score = m.score if m.score is not None else 0
+
         result.append({
             "subject": m.subject,
-            "score": m.score,
-            "grade": get_grade(m.score),
-            "gp": get_grade_point(m.score)
+            "score": score,
+            "grade": get_grade(score),
+            "gp": get_grade_point(score)
         })
 
     return result
