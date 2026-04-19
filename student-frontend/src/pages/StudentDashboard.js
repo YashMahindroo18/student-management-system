@@ -11,7 +11,7 @@ function StudentDashboard() {
   const [timetable, setTimetable] = useState([]);
   const [activeTab, setActiveTab] = useState("profile");
   const [semester, setSemester] = useState(1);
-  const [cgpa, setCgpa] = useState(0);   // ✅ NEW
+  const [cgpa, setCgpa] = useState(0);
 
   const navigate = useNavigate();
 
@@ -54,10 +54,9 @@ function StudentDashboard() {
 
     fetchProfile();
     fetchTimetable();
-    fetchCGPA();   // ✅ NEW
+    fetchCGPA();
   }, [navigate]);
 
-  // 🔥 Fetch marks when semester changes
   useEffect(() => {
     const fetchMarks = async () => {
       try {
@@ -81,11 +80,13 @@ function StudentDashboard() {
 
   if (!data) return <p className="text-center mt-10">Loading...</p>;
 
-  // 🔥 CALCULATIONS
-  const total = marks.reduce((sum, m) => sum + m.score, 0);
+  const total = marks.reduce((sum, m) => sum + (m.score || 0), 0);
 
   const sgpa = marks.length
-    ? (marks.reduce((sum, m) => sum + m.gp, 0) / marks.length).toFixed(2)
+    ? (
+        marks.reduce((sum, m) => sum + (m.gp || 0), 0) /
+        marks.length
+      ).toFixed(2)
     : 0;
 
   return (
@@ -94,40 +95,25 @@ function StudentDashboard() {
 
       <div className="p-6 flex flex-col items-center gap-6">
 
-        {/* 🔹 TAB BUTTONS */}
+        {/* 🔹 Tabs */}
         <div className="flex gap-4">
-          <button
-            onClick={() => setActiveTab("profile")}
-            className={`px-4 py-2 rounded-full ${
-              activeTab === "profile"
-                ? "bg-blue-400 text-white"
-                : "bg-white shadow"
-            }`}
-          >
-            Profile
-          </button>
-
-          <button
-            onClick={() => setActiveTab("marks")}
-            className={`px-4 py-2 rounded-full ${
-              activeTab === "marks"
-                ? "bg-green-400 text-white"
-                : "bg-white shadow"
-            }`}
-          >
-            Marksheet
-          </button>
-
-          <button
-            onClick={() => setActiveTab("timetable")}
-            className={`px-4 py-2 rounded-full ${
-              activeTab === "timetable"
-                ? "bg-purple-400 text-white"
-                : "bg-white shadow"
-            }`}
-          >
-            Timetable
-          </button>
+          {["profile", "marks", "timetable"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-5 py-2 rounded-full transition ${
+                activeTab === tab
+                  ? "bg-blue-500 text-white shadow-lg"
+                  : "bg-white shadow hover:bg-gray-100"
+              }`}
+            >
+              {tab === "profile"
+                ? "Profile"
+                : tab === "marks"
+                ? "Marksheet"
+                : "Timetable"}
+            </button>
+          ))}
         </div>
 
         <div className="w-full max-w-4xl">
@@ -144,64 +130,80 @@ function StudentDashboard() {
             </div>
           )}
 
-          {/* 🔥 MARKSHEET */}
+          {/* MARKSHEET */}
           {activeTab === "marks" && (
             <div className="bg-white/80 shadow-xl rounded-2xl p-6">
 
-              <h2 className="text-2xl font-bold text-center mb-2">
+              <h2 className="text-2xl font-bold text-center mb-1">
                 IILM University
               </h2>
 
-              <p className="text-center mb-4 text-gray-600">
+              <p className="text-center text-gray-500 mb-4">
                 Semester Marksheet
               </p>
 
-              {/* Semester Selector */}
+              {/* Semester */}
               <div className="mb-4 text-center">
                 <select
                   value={semester}
                   onChange={(e) => setSemester(Number(e.target.value))}
-                  className="border p-2 rounded"
+                  className="border px-3 py-2 rounded shadow"
                 >
                   <option value={1}>Semester 1</option>
                   <option value={2}>Semester 2</option>
                 </select>
               </div>
 
-              {/* Student Info */}
+              {/* Info */}
               <div className="mb-4">
                 <p><b>Name:</b> {data.roll_number}</p>
                 <p><b>Email:</b> {data.email}</p>
               </div>
 
               {/* Table */}
-              <table className="w-full border text-center">
-                <thead className="bg-purple-100">
+              <table className="w-full border text-center rounded overflow-hidden">
+                <thead className="bg-purple-200">
                   <tr>
-                    <th>Subject</th>
-                    <th>Marks</th>
-                    <th>Grade</th>
-                    <th>GP</th>
+                    <th className="p-2">Subject</th>
+                    <th className="p-2">Marks</th>
+                    <th className="p-2">Grade</th>
+                    <th className="p-2">GP</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {marks.map((m, i) => (
-                    <tr key={i}>
-                      <td>{m.subject}</td>
-                      <td>{m.score}</td>
-                      <td>{m.grade}</td>
-                      <td>{m.gp}</td>
+                    <tr key={i} className="border-t">
+                      <td className="p-2">{m.subject}</td>
+                      <td className="p-2">{m.score}</td>
+                      <td className="p-2">{m.grade}</td>
+                      <td className="p-2">{m.gp}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
 
-              {/* RESULT */}
+              {/* Result */}
               <div className="mt-4 text-right space-y-1">
                 <p><b>Total Marks:</b> {total}</p>
                 <p><b>SGPA:</b> {sgpa}</p>
-                <p><b>CGPA:</b> {cgpa}</p> {/* ✅ NEW */}
+                <p><b>CGPA:</b> {cgpa}</p>
+              </div>
+
+              {/* PDF BUTTON */}
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => {
+                    const token = localStorage.getItem("token");
+
+                    window.open(
+                      `${API}/student/marksheet/pdf/${semester}?token=${token}`
+                    );
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow"
+                >
+                  Download Marksheet PDF
+                </button>
               </div>
             </div>
           )}
@@ -213,22 +215,22 @@ function StudentDashboard() {
 
               <table className="w-full border text-center">
                 <thead>
-                  <tr className="bg-purple-100">
+                  <tr className="bg-purple-200">
                     <th>Day</th>
-                    {[1,2,3,4,5,6,7].map(slot => (
+                    {[1,2,3,4,5,6,7].map((slot) => (
                       <th key={slot}>Slot {slot}</th>
                     ))}
                   </tr>
                 </thead>
 
                 <tbody>
-                  {["Monday","Tuesday","Wednesday","Thursday","Friday"].map(day => (
+                  {["Monday","Tuesday","Wednesday","Thursday","Friday"].map((day) => (
                     <tr key={day}>
                       <td className="font-semibold bg-purple-50">{day}</td>
 
-                      {[1,2,3,4,5,6,7].map(slot => {
+                      {[1,2,3,4,5,6,7].map((slot) => {
                         const entry = timetable.find(
-                          t => t.day === day && t.slot === slot
+                          (t) => t.day === day && t.slot === slot
                         );
 
                         return (

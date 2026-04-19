@@ -20,3 +20,14 @@ def create_access_token(data: dict, expires_minutes: int = 30):
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM
     )
+from jose import jwt, JWTError
+
+SECRET_KEY = "your_secret"
+ALGORITHM = "HS256"
+
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        return None
