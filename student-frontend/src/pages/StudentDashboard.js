@@ -7,6 +7,7 @@ const API = process.env.REACT_APP_API_URL;
 
 function StudentDashboard() {
   const [data, setData] = useState(null);
+  const [marks, setMarks] = useState([]); // ✅ correct placement
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,22 +32,22 @@ function StudentDashboard() {
       }
     };
 
+    const fetchMarks = async () => {
+      try {
+        const res = await axios.get(`${API}/student/marks`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setMarks(res.data);
+      } catch (err) {
+        console.log(err.response);
+      }
+    };
 
     fetchProfile();
-    const [marks, setMarks] = useState([]);
-    const fetchMarks = async () => {
-  try {
-    const token = localStorage.getItem("token");
-
-    const res = await axios.get(`${API}/student/marks`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    setMarks(res.data);
-  } catch {}
-};
+    fetchMarks();
   }, [navigate]);
 
   if (!data) return <p className="text-center mt-10">Loading...</p>;
@@ -55,7 +56,9 @@ function StudentDashboard() {
     <div className="bg-gray-100 min-h-screen">
       <Navbar role="student" />
 
-      <div className="p-6 flex justify-center">
+      <div className="p-6 flex flex-col items-center gap-6">
+
+        {/* PROFILE */}
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">My Profile</h2>
 
@@ -64,6 +67,24 @@ function StudentDashboard() {
           <p><b>Department:</b> {data.department}</p>
           <p><b>Year:</b> {data.year}</p>
         </div>
+
+        {/* MARKS */}
+        <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
+          <h2 className="text-xl font-bold mb-4">My Marks</h2>
+
+          {marks.length === 0 ? (
+            <p>No marks available</p>
+          ) : (
+            <ul>
+              {marks.map((m, i) => (
+                <li key={i}>
+                  {m.subject} - {m.score}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
       </div>
     </div>
   );
