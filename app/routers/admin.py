@@ -5,6 +5,8 @@ from app.db.database import get_db
 from app.db.models import Student
 from app.schemas.student import StudentCreate, StudentResponse
 from app.utils.dependencies import require_role
+from app.db.models import Mark
+from app.schemas.mark import MarkCreate, MarkResponse
 
 router = APIRouter()
 
@@ -38,3 +40,16 @@ def get_all_students(
     user=Depends(require_role("admin"))
 ):
     return db.query(Student).all()
+@router.post("/marks", response_model=MarkResponse)
+def add_marks(
+    data: MarkCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    mark = Mark(**data.dict())
+
+    db.add(mark)
+    db.commit()
+    db.refresh(mark)
+
+    return mark

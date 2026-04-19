@@ -21,3 +21,10 @@ class Student(Base):
     department = Column(String)
     year = Column(Integer)
     is_active = Column(Boolean, default=False)
+class Mark(Base):
+    __tablename__ = "marks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_email = Column(String, index=True)
+    subject = Column(String)
+    score = Column(Integer)
