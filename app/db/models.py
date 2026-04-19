@@ -24,17 +24,11 @@ class Student(Base):
 class Mark(Base):
     __tablename__ = "marks"
 
-    id = Column(Integer, primary_key=True)
-    student_email = Column(String)
-    semester = Column(Integer)
+    id = Column(Integer, primary_key=True, index=True)
+    student_email = Column(String, index=True)
 
-    course_code = Column(String)
-    course_name = Column(String)
-    credit = Column(Integer)
-
-    grade = Column(String)        # A, B+
-    grade_point = Column(Integer) # 10, 9
-    credit_point = Column(Integer)
+    subject = Column(String)   # ✅ THIS WAS MISSING
+    score = Column(Integer)
 class Timetable(Base):
     __tablename__ = "timetable"
 
