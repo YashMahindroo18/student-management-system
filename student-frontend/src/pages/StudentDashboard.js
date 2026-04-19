@@ -90,7 +90,14 @@ function StudentDashboard() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
+    <div
+  className="min-h-screen bg-cover bg-center"
+  style={{
+    backgroundImage:
+      "url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1')"
+  }}
+> 
+<div className="min-h-screen bg-white/70 backdrop-blur-md"></div>
       <Navbar role="student" />
 
       <div className="p-6 flex flex-col items-center gap-6">
@@ -131,13 +138,13 @@ function StudentDashboard() {
 
           {/* MARKSHEET */}
           {activeTab === "marks" && (
-            <div className="bg-white/80 shadow-xl rounded-2xl p-6">
+            <div className="bg-white shadow-2xl rounded-lg p-8 border border-gray-300">
 
-              <h2 className="text-2xl font-bold text-center mb-1">
+              <h2 className="text-3xl font-bold text-center tracking-wide">
                 IILM University
               </h2>
 
-              <p className="text-center text-gray-500 mb-4">
+              <p className="text-center text-gray-600 mb-6">
                 Semester Marksheet
               </p>
 
@@ -158,7 +165,7 @@ function StudentDashboard() {
               </div>
 
               <table className="w-full border text-center">
-                <thead className="bg-purple-200">
+                <thead className="bg-gray-800 text-white">
                   <tr>
                     <th className="p-2">Subject</th>
                     <th className="p-2">Marks</th>
@@ -169,7 +176,7 @@ function StudentDashboard() {
 
                 <tbody>
                   {marks.map((m, i) => (
-                    <tr key={i}>
+                    <tr key={i} className="border-t hover:bg-gray-100 transition">
                       <td className="p-2">{m.subject}</td>
                       <td className="p-2">{m.score}</td>
                       <td className="p-2">{m.grade}</td>
@@ -179,7 +186,7 @@ function StudentDashboard() {
                 </tbody>
               </table>
 
-              <div className="mt-4 text-right space-y-1">
+              <div className="mt-6 text-right space-y-2 text-lg">
                 <p><b>Total Marks:</b> {total}</p>
                 <p><b>SGPA:</b> {sgpa}</p>
                 <p><b>CGPA:</b> {cgpa}</p>
@@ -211,7 +218,7 @@ function StudentDashboard() {
                       alert("Error downloading PDF");
                     }
                   }}
-                  className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow"
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-5 py-2 rounded-lg shadow hover:scale-105 transition"
                 >
                   Download Marksheet PDF
                 </button>
