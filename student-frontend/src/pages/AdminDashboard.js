@@ -21,7 +21,11 @@ function AdminDashboard() {
     score: "",
   });
 
-  // 🟣 Timetable states
+  // 🔍 SEARCH STATES
+  const [search, setSearch] = useState("");
+  const [filteredStudents, setFilteredStudents] = useState([]);
+
+  // 🟣 Timetable
   const days = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
   const slots = [1,2,3,4,5,6,7];
   const [timetableData, setTimetableData] = useState({});
@@ -55,6 +59,20 @@ function AdminDashboard() {
 
     fetchStudents();
   }, [fetchStudents, navigate]);
+
+  // 🔍 FILTER LOGIC
+  useEffect(() => {
+    if (!search) {
+      setFilteredStudents([]);
+      return;
+    }
+
+    const filtered = students.filter(s =>
+      s.email.toLowerCase().includes(search.toLowerCase())
+    );
+
+    setFilteredStudents(filtered);
+  }, [search, students]);
 
   // 🔹 Create student
   const handleCreate = async () => {
@@ -113,12 +131,14 @@ function AdminDashboard() {
         score: "",
       });
 
+      setSearch("");
+
     } catch (err) {
       alert(err.response?.data?.detail || "Error adding marks");
     }
   };
 
-  // 🔹 Timetable input handler
+  // 🔹 Timetable handlers
   const handleChange = (day, slot, value) => {
     setTimetableData(prev => ({
       ...prev,
@@ -126,7 +146,6 @@ function AdminDashboard() {
     }));
   };
 
-  // 🔹 Save timetable
   const handleSaveTimetable = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -134,7 +153,6 @@ function AdminDashboard() {
       for (let day of days) {
         for (let slot of slots) {
           const subject = timetableData[`${day}-${slot}`];
-
           if (!subject) continue;
 
           await axios.post(`${API}/admin/timetable`, {
@@ -152,12 +170,11 @@ function AdminDashboard() {
       }
 
       alert("Timetable saved!");
-    } catch (err) {
+    } catch {
       alert("Error saving timetable");
     }
   };
 
-  // 🔹 Clear timetable
   const handleClearTimetable = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -211,25 +228,39 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {/* ADD MARKS */}
+        {/* ADD MARKS (UPDATED 🔥) */}
         <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
           <h2 className="font-bold mb-3">Add Marks</h2>
 
           <div className="grid grid-cols-3 gap-3">
-            <select
-              className="border p-2 rounded"
-              value={markForm.student_email}
-              onChange={(e) =>
-                setMarkForm({ ...markForm, student_email: e.target.value })
-              }
-            >
-              <option value="">Select Student</option>
-              {students.map((s, i) => (
-                <option key={i} value={s.email}>
-                  {s.email}
-                </option>
-              ))}
-            </select>
+
+            {/* 🔍 SEARCH INPUT */}
+            <div className="relative">
+              <input
+                className="border p-2 rounded w-full"
+                placeholder="Search student email"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              {filteredStudents.length > 0 && (
+                <div className="absolute bg-white border w-full mt-1 max-h-40 overflow-y-auto shadow rounded z-10">
+                  {filteredStudents.map((s, i) => (
+                    <div
+                      key={i}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        setMarkForm({ ...markForm, student_email: s.email });
+                        setSearch(s.email);
+                        setFilteredStudents([]);
+                      }}
+                    >
+                      {s.email}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <input
               className="border p-2 rounded"
@@ -262,37 +293,35 @@ function AdminDashboard() {
         <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
           <h2 className="font-bold mb-3">Timetable Editor</h2>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border text-center">
-              <thead>
-                <tr className="bg-purple-100">
-                  <th>Day</th>
-                  {slots.map(s => <th key={s}>Slot {s}</th>)}
+          <table className="w-full border text-center">
+            <thead>
+              <tr className="bg-purple-100">
+                <th>Day</th>
+                {slots.map(s => <th key={s}>Slot {s}</th>)}
+              </tr>
+            </thead>
+
+            <tbody>
+              {days.map(day => (
+                <tr key={day}>
+                  <td className="font-semibold bg-purple-50">{day}</td>
+
+                  {slots.map(slot => (
+                    <td key={slot}>
+                      <input
+                        className="border p-1 w-full rounded"
+                        placeholder="Subject"
+                        value={timetableData[`${day}-${slot}`] || ""}
+                        onChange={(e) =>
+                          handleChange(day, slot, e.target.value)
+                        }
+                      />
+                    </td>
+                  ))}
                 </tr>
-              </thead>
-
-              <tbody>
-                {days.map(day => (
-                  <tr key={day}>
-                    <td className="font-semibold bg-purple-50">{day}</td>
-
-                    {slots.map(slot => (
-                      <td key={slot}>
-                        <input
-                          className="border p-1 w-full rounded"
-                          placeholder="Subject"
-                          value={timetableData[`${day}-${slot}`] || ""}
-                          onChange={(e) =>
-                            handleChange(day, slot, e.target.value)
-                          }
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
 
           <div className="flex gap-3 mt-4">
             <button
@@ -309,33 +338,6 @@ function AdminDashboard() {
               Clear
             </button>
           </div>
-        </div>
-
-        {/* STUDENT LIST */}
-        <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
-          <h2 className="font-bold mb-3">Students</h2>
-
-          <table className="w-full border text-center">
-            <thead>
-              <tr className="bg-gray-200">
-                <th>Email</th>
-                <th>Roll</th>
-                <th>Dept</th>
-                <th>Year</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {students.map((s, i) => (
-                <tr key={i} className="border-t">
-                  <td>{s.email}</td>
-                  <td>{s.roll_number}</td>
-                  <td>{s.department}</td>
-                  <td>{s.year}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
 
       </div>
