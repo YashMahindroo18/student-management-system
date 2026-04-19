@@ -21,7 +21,7 @@ function AdminDashboard() {
     score: "",
   });
 
-  // 🔍 SEARCH STATES
+  // 🔍 Search states
   const [search, setSearch] = useState("");
   const [filteredStudents, setFilteredStudents] = useState([]);
 
@@ -60,7 +60,7 @@ function AdminDashboard() {
     fetchStudents();
   }, [fetchStudents, navigate]);
 
-  // 🔍 FILTER LOGIC
+  // 🔍 Filter students
   useEffect(() => {
     if (!search) {
       setFilteredStudents([]);
@@ -105,12 +105,22 @@ function AdminDashboard() {
     }
   };
 
-  // 🔹 Add marks
+  // 🔹 Add marks (FIXED)
   const handleAddMarks = async () => {
     try {
+      if (!markForm.student_email) {
+        alert("Please select a student from dropdown");
+        return;
+      }
+
+      if (!markForm.subject || !markForm.score) {
+        alert("Fill all fields");
+        return;
+      }
+
       const token = localStorage.getItem("token");
 
-      await axios.post(
+      const res = await axios.post(
         `${API}/admin/marks`,
         {
           ...markForm,
@@ -123,6 +133,8 @@ function AdminDashboard() {
         }
       );
 
+      console.log("SUCCESS:", res.data);
+
       alert("Marks added!");
 
       setMarkForm({
@@ -134,6 +146,7 @@ function AdminDashboard() {
       setSearch("");
 
     } catch (err) {
+      console.log("ERROR:", err.response);
       alert(err.response?.data?.detail || "Error adding marks");
     }
   };
@@ -228,13 +241,13 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {/* ADD MARKS (UPDATED 🔥) */}
+        {/* ADD MARKS */}
         <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
           <h2 className="font-bold mb-3">Add Marks</h2>
 
           <div className="grid grid-cols-3 gap-3">
 
-            {/* 🔍 SEARCH INPUT */}
+            {/* SEARCH */}
             <div className="relative">
               <input
                 className="border p-2 rounded w-full"
@@ -280,6 +293,10 @@ function AdminDashboard() {
               }
             />
           </div>
+
+          <p className="text-sm text-gray-600 mt-2">
+            Selected: {markForm.student_email || "None"}
+          </p>
 
           <button
             onClick={handleAddMarks}
@@ -338,6 +355,33 @@ function AdminDashboard() {
               Clear
             </button>
           </div>
+        </div>
+
+        {/* STUDENT LIST */}
+        <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
+          <h2 className="font-bold mb-3">Students</h2>
+
+          <table className="w-full border text-center">
+            <thead>
+              <tr className="bg-gray-200">
+                <th>Email</th>
+                <th>Roll</th>
+                <th>Dept</th>
+                <th>Year</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {students.map((s, i) => (
+                <tr key={i} className="border-t">
+                  <td>{s.email}</td>
+                  <td>{s.roll_number}</td>
+                  <td>{s.department}</td>
+                  <td>{s.year}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
       </div>
