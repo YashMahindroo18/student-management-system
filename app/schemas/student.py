@@ -13,7 +13,7 @@ class StudentResponse(BaseModel):
     roll_number: str
     department: str
     year: int
-    is_active: bool   # ✅ VERY IMPORTANT
+    is_active: bool
 
     class Config:
-        from_attributes = True  # for SQLAlchemy compatibility
+        from_attributes = True
