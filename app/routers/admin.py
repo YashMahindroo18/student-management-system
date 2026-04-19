@@ -88,3 +88,18 @@ def clear_timetable(
     db.commit()
 
     return {"message": "Timetable cleared"}
+@router.put("/students/activate/{email}")
+def activate_student(
+    email: str,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    student = db.query(Student).filter(Student.email == email).first()
+
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    student.is_active = True
+    db.commit()
+
+    return {"message": "Student activated"}

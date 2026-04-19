@@ -21,11 +21,9 @@ function AdminDashboard() {
     score: "",
   });
 
-  // 🔍 Search states
   const [search, setSearch] = useState("");
   const [filteredStudents, setFilteredStudents] = useState([]);
 
-  // 🟣 Timetable
   const days = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
   const slots = [1,2,3,4,5,6,7];
   const [timetableData, setTimetableData] = useState({});
@@ -105,11 +103,29 @@ function AdminDashboard() {
     }
   };
 
-  // 🔹 Add marks (FIXED)
+  // 🔹 Activate student (NEW 🔥)
+  const handleActivateStudent = async (email) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.put(`${API}/admin/students/activate/${email}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Student activated!");
+      fetchStudents();
+    } catch {
+      alert("Error activating student");
+    }
+  };
+
+  // 🔹 Add marks
   const handleAddMarks = async () => {
     try {
       if (!markForm.student_email) {
-        alert("Please select a student from dropdown");
+        alert("Please select a student");
         return;
       }
 
@@ -120,7 +136,7 @@ function AdminDashboard() {
 
       const token = localStorage.getItem("token");
 
-      const res = await axios.post(
+      await axios.post(
         `${API}/admin/marks`,
         {
           ...markForm,
@@ -133,8 +149,6 @@ function AdminDashboard() {
         }
       );
 
-      console.log("SUCCESS:", res.data);
-
       alert("Marks added!");
 
       setMarkForm({
@@ -146,12 +160,12 @@ function AdminDashboard() {
       setSearch("");
 
     } catch (err) {
-      console.log("ERROR:", err.response);
+      console.log(err.response);
       alert(err.response?.data?.detail || "Error adding marks");
     }
   };
 
-  // 🔹 Timetable handlers
+  // 🔹 Timetable
   const handleChange = (day, slot, value) => {
     setTimetableData(prev => ({
       ...prev,
@@ -212,162 +226,85 @@ function AdminDashboard() {
       <div className="p-6 max-w-5xl mx-auto space-y-6">
 
         {/* CREATE STUDENT */}
-        <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
+        <div className="bg-white/70 p-4 rounded-xl shadow">
           <h2 className="font-bold mb-3">Create Student</h2>
 
           <div className="grid grid-cols-2 gap-3">
-            <input className="border p-2 rounded" placeholder="Email"
+            <input placeholder="Email" className="border p-2"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })} />
 
-            <input className="border p-2 rounded" placeholder="Roll Number"
+            <input placeholder="Roll Number" className="border p-2"
               value={form.roll_number}
               onChange={(e) => setForm({ ...form, roll_number: e.target.value })} />
 
-            <input className="border p-2 rounded" placeholder="Department"
+            <input placeholder="Department" className="border p-2"
               value={form.department}
               onChange={(e) => setForm({ ...form, department: e.target.value })} />
 
-            <input className="border p-2 rounded" placeholder="Year"
+            <input placeholder="Year" className="border p-2"
               value={form.year}
               onChange={(e) => setForm({ ...form, year: e.target.value })} />
           </div>
 
-          <button
-            onClick={handleCreate}
-            className="mt-3 bg-blue-500 text-white px-4 py-2 rounded"
-          >
+          <button onClick={handleCreate} className="mt-3 bg-blue-500 text-white px-4 py-2 rounded">
             Create Student
           </button>
         </div>
 
         {/* ADD MARKS */}
-        <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
+        <div className="bg-white/70 p-4 rounded-xl shadow">
           <h2 className="font-bold mb-3">Add Marks</h2>
 
           <div className="grid grid-cols-3 gap-3">
 
-            {/* SEARCH */}
             <div className="relative">
               <input
-                className="border p-2 rounded w-full"
-                placeholder="Search student email"
+                placeholder="Search student"
+                className="border p-2 w-full"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
 
-              {filteredStudents.length > 0 && (
-                <div className="absolute bg-white border w-full mt-1 max-h-40 overflow-y-auto shadow rounded z-10">
-                  {filteredStudents.map((s, i) => (
-                    <div
-                      key={i}
-                      className="p-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        setMarkForm({ ...markForm, student_email: s.email });
-                        setSearch(s.email);
-                        setFilteredStudents([]);
-                      }}
-                    >
-                      {s.email}
-                    </div>
-                  ))}
+              {filteredStudents.map((s, i) => (
+                <div key={i}
+                  className="p-2 bg-white cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                    setMarkForm({ ...markForm, student_email: s.email });
+                    setSearch(s.email);
+                    setFilteredStudents([]);
+                  }}>
+                  {s.email}
                 </div>
-              )}
+              ))}
             </div>
 
-            <input
-              className="border p-2 rounded"
-              placeholder="Subject"
+            <input placeholder="Subject" className="border p-2"
               value={markForm.subject}
-              onChange={(e) =>
-                setMarkForm({ ...markForm, subject: e.target.value })
-              }
-            />
+              onChange={(e) => setMarkForm({ ...markForm, subject: e.target.value })} />
 
-            <input
-              className="border p-2 rounded"
-              placeholder="Score"
+            <input placeholder="Score" className="border p-2"
               value={markForm.score}
-              onChange={(e) =>
-                setMarkForm({ ...markForm, score: e.target.value })
-              }
-            />
+              onChange={(e) => setMarkForm({ ...markForm, score: e.target.value })} />
           </div>
 
-          <p className="text-sm text-gray-600 mt-2">
-            Selected: {markForm.student_email || "None"}
-          </p>
-
-          <button
-            onClick={handleAddMarks}
-            className="mt-3 bg-green-500 text-white px-4 py-2 rounded"
-          >
+          <button onClick={handleAddMarks} className="mt-3 bg-green-500 text-white px-4 py-2 rounded">
             Add Marks
           </button>
         </div>
 
-        {/* TIMETABLE EDITOR */}
-        <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
-          <h2 className="font-bold mb-3">Timetable Editor</h2>
-
-          <table className="w-full border text-center">
-            <thead>
-              <tr className="bg-purple-100">
-                <th>Day</th>
-                {slots.map(s => <th key={s}>Slot {s}</th>)}
-              </tr>
-            </thead>
-
-            <tbody>
-              {days.map(day => (
-                <tr key={day}>
-                  <td className="font-semibold bg-purple-50">{day}</td>
-
-                  {slots.map(slot => (
-                    <td key={slot}>
-                      <input
-                        className="border p-1 w-full rounded"
-                        placeholder="Subject"
-                        value={timetableData[`${day}-${slot}`] || ""}
-                        onChange={(e) =>
-                          handleChange(day, slot, e.target.value)
-                        }
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="flex gap-3 mt-4">
-            <button
-              onClick={handleSaveTimetable}
-              className="bg-green-500 text-white px-4 py-2 rounded"
-            >
-              Save Timetable
-            </button>
-
-            <button
-              onClick={handleClearTimetable}
-              className="bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-
-        {/* STUDENT LIST */}
-        <div className="bg-white/70 backdrop-blur-md p-4 rounded-xl shadow">
+        {/* STUDENT LIST WITH ACTIVATION */}
+        <div className="bg-white/70 p-4 rounded-xl shadow">
           <h2 className="font-bold mb-3">Students</h2>
 
-          <table className="w-full border text-center">
+          <table className="w-full text-center border">
             <thead>
               <tr className="bg-gray-200">
                 <th>Email</th>
                 <th>Roll</th>
                 <th>Dept</th>
                 <th>Year</th>
+                <th>Status</th>
               </tr>
             </thead>
 
@@ -378,6 +315,18 @@ function AdminDashboard() {
                   <td>{s.roll_number}</td>
                   <td>{s.department}</td>
                   <td>{s.year}</td>
+                  <td>
+                    {s.is_active ? (
+                      <span className="text-green-600">Active</span>
+                    ) : (
+                      <button
+                        onClick={() => handleActivateStudent(s.email)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded text-sm"
+                      >
+                        Activate
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
