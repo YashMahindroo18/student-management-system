@@ -97,7 +97,7 @@ function StudentDashboard() {
       "url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1')"
   }}
 > 
-<div className="min-h-screen bg-white/70 backdrop-blur-md"></div>
+<div className="min-h-screen bg-white/70 backdrop-blur-md">
       <Navbar role="student" />
 
       <div className="p-6 flex flex-col items-center gap-6">
@@ -262,6 +262,8 @@ function StudentDashboard() {
 
         </div>
       </div>
+    </div>
+
     </div>
   );
 }
