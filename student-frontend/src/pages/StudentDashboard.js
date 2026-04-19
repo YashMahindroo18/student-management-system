@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { motion } from "framer-motion";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const API = process.env.REACT_APP_API_URL;
 
@@ -95,66 +104,56 @@ function StudentDashboard() {
 
       <div className="flex">
 
-        {/* 🔹 SIDEBAR */}
+        {/* SIDEBAR */}
         <div className="w-64 min-h-screen bg-white shadow-lg p-5">
           <h2 className="text-xl font-bold mb-6 text-center">
             🎓 IILM Portal
           </h2>
 
           <div className="flex flex-col gap-3">
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`p-3 rounded ${
-                activeTab === "profile"
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              Profile
-            </button>
-
-            <button
-              onClick={() => setActiveTab("marks")}
-              className={`p-3 rounded ${
-                activeTab === "marks"
-                  ? "bg-green-500 text-white"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              Marksheet
-            </button>
-
-            <button
-              onClick={() => setActiveTab("timetable")}
-              className={`p-3 rounded ${
-                activeTab === "timetable"
-                  ? "bg-purple-500 text-white"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              Timetable
-            </button>
+            {["profile", "marks", "timetable"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`p-3 rounded transition transform hover:scale-105 ${
+                  activeTab === tab
+                    ? "bg-blue-500 text-white"
+                    : "hover:bg-gray-200"
+                }`}
+              >
+                {tab === "profile"
+                  ? "Profile"
+                  : tab === "marks"
+                  ? "Marksheet"
+                  : "Timetable"}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* 🔹 MAIN CONTENT */}
-        <div className="flex-1 p-6">
+        {/* MAIN CONTENT */}
+        <motion.div
+          className="flex-1 p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
 
-          {/* 🔥 DASHBOARD CARDS */}
+          {/* DASHBOARD CARDS */}
           <div className="grid grid-cols-3 gap-4 mb-6">
 
-            <div className="bg-white shadow rounded p-4 text-center">
-              <p className="text-gray-500">CGPA</p>
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg rounded-lg p-5 text-center">
+              <p>CGPA</p>
               <h2 className="text-2xl font-bold">{cgpa}</h2>
             </div>
 
-            <div className="bg-white shadow rounded p-4 text-center">
-              <p className="text-gray-500">Subjects</p>
+            <div className="bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-lg rounded-lg p-5 text-center">
+              <p>Subjects</p>
               <h2 className="text-2xl font-bold">{marks.length}</h2>
             </div>
 
-            <div className="bg-white shadow rounded p-4 text-center">
-              <p className="text-gray-500">Semester</p>
+            <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white shadow-lg rounded-lg p-5 text-center">
+              <p>Semester</p>
               <h2 className="text-2xl font-bold">{semester}</h2>
             </div>
 
@@ -171,17 +170,12 @@ function StudentDashboard() {
             </div>
           )}
 
-          {/* MARKSHEET */}
+          {/* MARKS */}
           {activeTab === "marks" && (
             <div className="bg-white shadow-2xl rounded-lg p-8 border border-gray-300">
 
-              <h2 className="text-3xl font-bold text-center tracking-wide">
-                IILM University
-              </h2>
-
-              <p className="text-center text-gray-600 mb-6">
-                Semester Marksheet
-              </p>
+              <h2 className="text-3xl font-bold text-center">IILM University</h2>
+              <p className="text-center text-gray-600 mb-6">Semester Marksheet</p>
 
               <div className="mb-4 text-center">
                 <select
@@ -192,11 +186,6 @@ function StudentDashboard() {
                   <option value={1}>Semester 1</option>
                   <option value={2}>Semester 2</option>
                 </select>
-              </div>
-
-              <div className="mb-4">
-                <p><b>Name:</b> {data.roll_number}</p>
-                <p><b>Email:</b> {data.email}</p>
               </div>
 
               <table className="w-full border text-center">
@@ -211,52 +200,32 @@ function StudentDashboard() {
 
                 <tbody>
                   {marks.map((m, i) => (
-                    <tr key={i} className="border-t hover:bg-gray-100 transition">
-                      <td className="p-2">{m.subject}</td>
-                      <td className="p-2">{m.score}</td>
-                      <td className="p-2">{m.grade}</td>
-                      <td className="p-2">{m.gp}</td>
+                    <tr key={i} className="border-t hover:bg-gray-100">
+                      <td>{m.subject}</td>
+                      <td>{m.score}</td>
+                      <td>{m.grade}</td>
+                      <td>{m.gp}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
 
-              <div className="mt-6 text-right space-y-2 text-lg">
-                <p><b>Total Marks:</b> {total}</p>
-                <p><b>SGPA:</b> {sgpa}</p>
-                <p><b>CGPA:</b> {cgpa}</p>
+              <div className="mt-6 text-right">
+                <p>Total: {total}</p>
+                <p>SGPA: {sgpa}</p>
+                <p>CGPA: {cgpa}</p>
               </div>
 
-              {/* PDF BUTTON */}
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={async () => {
-                    try {
-                      const token = localStorage.getItem("token");
-
-                      const res = await fetch(
-                        `${API}/student/marksheet/pdf/${semester}?token=${token}`
-                      );
-
-                      const blob = await res.blob();
-
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-
-                      a.href = url;
-                      a.download = `marksheet_sem_${semester}.pdf`;
-
-                      document.body.appendChild(a);
-                      a.click();
-                      a.remove();
-                    } catch (err) {
-                      alert("Error downloading PDF");
-                    }
-                  }}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-5 py-2 rounded-lg shadow hover:scale-105 transition"
-                >
-                  Download Marksheet PDF
-                </button>
+              {/* CHART */}
+              <div className="mt-8">
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={marks}>
+                    <XAxis dataKey="subject" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="score" />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
 
             </div>
@@ -294,7 +263,7 @@ function StudentDashboard() {
             </div>
           )}
 
-        </div>
+        </motion.div>
       </div>
     </div>
   );
