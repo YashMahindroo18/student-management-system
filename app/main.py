@@ -5,7 +5,7 @@ from app.db import models  # IMPORTANT: ensures models are loaded
 from app.db.database import engine
 from app.db.models import Base
 
-Base.metadata.drop_all(bind=engine)
+
 
 
 Base.metadata.create_all(bind=engine)
