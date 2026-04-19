@@ -28,7 +28,8 @@ class Mark(Base):
     id = Column(Integer, primary_key=True, index=True)
     student_email = Column(String, index=True)
 
-    subject = Column(String)   # ✅ THIS WAS MISSING
+    subject = Column(String)  
+    semester = Column(Integer) # ✅ THIS WAS MISSING
     score = Column(Integer)
 class Timetable(Base):
     __tablename__ = "timetable"

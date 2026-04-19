@@ -54,11 +54,12 @@ def add_marks(
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    # ✅ Create mark safely
+    # ✅ Create mark with semester
     mark = Mark(
         student_email=data.student_email,
         subject=data.subject,
-        score=data.score
+        score=data.score,
+        semester=data.semester   # ✅ NEW
     )
 
     db.add(mark)

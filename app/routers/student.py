@@ -30,13 +30,16 @@ def student_profile(
 
 from app.schemas.mark import MarkResponse
 
-@router.get("/marks", response_model=list[MarkResponse])
+@router.get("/marks/{semester}", response_model=list[MarkResponse])
 def get_marks(
+    semester: int,
     db: Session = Depends(get_db),
     user=Depends(require_role("student"))
 ):
-    marks = db.query(Mark).filter(Mark.student_email == user.email).all()
-    return marks
+    return db.query(Mark).filter(
+        Mark.student_email == user["sub"],
+        Mark.semester == semester
+    ).all()
 @router.get("/timetable", response_model=list[TimetableResponse])
 def get_timetable(
     db: Session = Depends(get_db),

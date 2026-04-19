@@ -10,6 +10,7 @@ function StudentDashboard() {
   const [marks, setMarks] = useState([]);
   const [timetable, setTimetable] = useState([]);
   const [activeTab, setActiveTab] = useState("profile");
+  const [semester, setSemester] = useState(1);
 
   const navigate = useNavigate();
 
@@ -24,9 +25,7 @@ function StudentDashboard() {
     const fetchProfile = async () => {
       try {
         const res = await axios.get(`${API}/student/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         setData(res.data);
       } catch {
@@ -34,38 +33,46 @@ function StudentDashboard() {
       }
     };
 
+    const fetchTimetable = async () => {
+      try {
+        const res = await axios.get(`${API}/student/timetable`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setTimetable(res.data);
+      } catch {}
+    };
+
+    fetchProfile();
+    fetchTimetable();
+  }, [navigate]);
+
+  // 🔥 Fetch marks when semester changes
+  useEffect(() => {
     const fetchMarks = async () => {
       try {
-        const res = await axios.get(`${API}/student/marks`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const token = localStorage.getItem("token");
+
+        const res = await axios.get(
+          `${API}/student/marks/${semester}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
         setMarks(res.data);
       } catch (err) {
         console.log("Marks error:", err.response);
       }
     };
 
-    const fetchTimetable = async () => {
-      try {
-        const res = await axios.get(`${API}/student/timetable`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setTimetable(res.data);
-      } catch (err) {
-        console.log("Timetable error:", err.response);
-      }
-    };
-
-    fetchProfile();
     fetchMarks();
-    fetchTimetable();
-  }, [navigate]);
+  }, [semester]);
 
   if (!data) return <p className="text-center mt-10">Loading...</p>;
+
+  // 🔥 CALCULATIONS
+  const total = marks.reduce((sum, m) => sum + m.score, 0);
+  const sgpa = marks.length ? (total / (marks.length * 10)).toFixed(2) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
@@ -94,7 +101,7 @@ function StudentDashboard() {
                 : "bg-white shadow"
             }`}
           >
-            Marks
+            Marksheet
           </button>
 
           <button
@@ -109,15 +116,12 @@ function StudentDashboard() {
           </button>
         </div>
 
-        {/* 🔹 CONTENT AREA */}
         <div className="w-full max-w-4xl">
 
           {/* PROFILE */}
           {activeTab === "profile" && (
-            <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                My Profile
-              </h2>
+            <div className="bg-white/70 shadow-xl rounded-2xl p-6">
+              <h2 className="text-xl font-semibold mb-4">My Profile</h2>
 
               <p><b>Email:</b> {data.email}</p>
               <p><b>Roll Number:</b> {data.roll_number}</p>
@@ -126,46 +130,74 @@ function StudentDashboard() {
             </div>
           )}
 
-          {/* MARKS */}
+          {/* 🔥 MARKSHEET */}
           {activeTab === "marks" && (
-            <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                My Marks
+            <div className="bg-white/80 shadow-xl rounded-2xl p-6">
+
+              <h2 className="text-2xl font-bold text-center mb-2">
+                IILM University
               </h2>
 
-              {marks.length === 0 ? (
-                <p>No marks available</p>
-              ) : (
-                <ul className="space-y-2">
+              <p className="text-center mb-4 text-gray-600">
+                Semester Marksheet
+              </p>
+
+              {/* Semester Selector */}
+              <div className="mb-4 text-center">
+                <select
+                  value={semester}
+                  onChange={(e) => setSemester(Number(e.target.value))}
+                  className="border p-2 rounded"
+                >
+                  <option value={1}>Semester 1</option>
+                  <option value={2}>Semester 2</option>
+                </select>
+              </div>
+
+              {/* Student Info */}
+              <div className="mb-4">
+                <p><b>Name:</b> {data.roll_number}</p>
+                <p><b>Email:</b> {data.email}</p>
+              </div>
+
+              {/* Table */}
+              <table className="w-full border text-center">
+                <thead className="bg-purple-100">
+                  <tr>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                  </tr>
+                </thead>
+
+                <tbody>
                   {marks.map((m, i) => (
-                    <li
-                      key={i}
-                      className="flex justify-between bg-white p-2 rounded-lg shadow-sm"
-                    >
-                      <span>{m.subject || m.course_name}</span>
-                      <span className="font-semibold text-green-500">
-                        {m.score || m.grade}
-                      </span>
-                    </li>
+                    <tr key={i}>
+                      <td>{m.subject}</td>
+                      <td>{m.score}</td>
+                    </tr>
                   ))}
-                </ul>
-              )}
+                </tbody>
+              </table>
+
+              {/* Result */}
+              <div className="mt-4 text-right">
+                <p><b>Total:</b> {total}</p>
+                <p><b>SGPA:</b> {sgpa}</p>
+              </div>
             </div>
           )}
 
           {/* TIMETABLE */}
           {activeTab === "timetable" && (
-            <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6 overflow-x-auto">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700">
-                Weekly Timetable
-              </h2>
+            <div className="bg-white/70 shadow-xl rounded-2xl p-6 overflow-x-auto">
+              <h2 className="text-xl font-semibold mb-4">Weekly Timetable</h2>
 
               <table className="w-full border text-center">
                 <thead>
                   <tr className="bg-purple-100">
-                    <th className="p-2">Day</th>
+                    <th>Day</th>
                     {[1,2,3,4,5,6,7].map(slot => (
-                      <th key={slot} className="p-2">Slot {slot}</th>
+                      <th key={slot}>Slot {slot}</th>
                     ))}
                   </tr>
                 </thead>
@@ -181,10 +213,8 @@ function StudentDashboard() {
                         );
 
                         return (
-                          <td key={slot} className="p-2">
-                            <div className="bg-white rounded-lg shadow-sm p-2">
-                              {entry ? entry.subject : "-"}
-                            </div>
+                          <td key={slot}>
+                            {entry ? entry.subject : "-"}
                           </td>
                         );
                       })}
