@@ -31,6 +31,8 @@ def student_profile(
 
 from app.schemas.mark import MarkResponse
 
+from app.utils.grade import get_grade, get_grade_point
+
 @router.get("/marks/{semester}")
 def get_marks(
     semester: int,
@@ -38,7 +40,7 @@ def get_marks(
     user=Depends(require_role("student"))
 ):
     marks = db.query(Mark).filter(
-        Mark.student_email == user["sub"],
+        Mark.student_email == user.email,   # ✅ FIXED
         Mark.semester == semester
     ).all()
 
