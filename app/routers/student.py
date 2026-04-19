@@ -70,3 +70,26 @@ def get_timetable(
     ).all()
 
     return timetable
+@router.get("/cgpa")
+def get_cgpa(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("student"))
+):
+    marks = db.query(Mark).filter(
+        Mark.student_email == user.email
+    ).all()
+
+    if not marks:
+        return {"cgpa": 0}
+
+    total_gp = 0
+    count = 0
+
+    for m in marks:
+        gp = get_grade_point(m.score if m.score else 0)
+        total_gp += gp
+        count += 1
+
+    cgpa = round(total_gp / count, 2)
+
+    return {"cgpa": cgpa}

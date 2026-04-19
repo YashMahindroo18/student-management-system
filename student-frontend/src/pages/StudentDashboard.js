@@ -11,6 +11,7 @@ function StudentDashboard() {
   const [timetable, setTimetable] = useState([]);
   const [activeTab, setActiveTab] = useState("profile");
   const [semester, setSemester] = useState(1);
+  const [cgpa, setCgpa] = useState(0);   // ✅ NEW
 
   const navigate = useNavigate();
 
@@ -42,8 +43,18 @@ function StudentDashboard() {
       } catch {}
     };
 
+    const fetchCGPA = async () => {
+      try {
+        const res = await axios.get(`${API}/student/cgpa`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setCgpa(res.data.cgpa);
+      } catch {}
+    };
+
     fetchProfile();
     fetchTimetable();
+    fetchCGPA();   // ✅ NEW
   }, [navigate]);
 
   // 🔥 Fetch marks when semester changes
@@ -73,9 +84,9 @@ function StudentDashboard() {
   // 🔥 CALCULATIONS
   const total = marks.reduce((sum, m) => sum + m.score, 0);
 
-const sgpa = marks.length
-  ? (marks.reduce((sum, m) => sum + m.gp, 0) / marks.length).toFixed(2)
-  : 0;
+  const sgpa = marks.length
+    ? (marks.reduce((sum, m) => sum + m.gp, 0) / marks.length).toFixed(2)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
@@ -166,31 +177,32 @@ const sgpa = marks.length
               {/* Table */}
               <table className="w-full border text-center">
                 <thead className="bg-purple-100">
-  <tr>
-    <th>Subject</th>
-    <th>Marks</th>
-    <th>Grade</th>
-    <th>GP</th>
-  </tr>
-</thead>
+                  <tr>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>GP</th>
+                  </tr>
+                </thead>
 
                 <tbody>
                   {marks.map((m, i) => (
-  <tr key={i}>
-    <td>{m.subject}</td>
-    <td>{m.score}</td>
-    <td>{m.grade}</td>
-    <td>{m.gp}</td>
-  </tr>
-))}
+                    <tr key={i}>
+                      <td>{m.subject}</td>
+                      <td>{m.score}</td>
+                      <td>{m.grade}</td>
+                      <td>{m.gp}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
 
-              {/* Result */}
+              {/* RESULT */}
               <div className="mt-4 text-right space-y-1">
-  <p><b>Total Marks:</b> {total}</p>
-  <p><b>SGPA:</b> {sgpa}</p>
-</div>
+                <p><b>Total Marks:</b> {total}</p>
+                <p><b>SGPA:</b> {sgpa}</p>
+                <p><b>CGPA:</b> {cgpa}</p> {/* ✅ NEW */}
+              </div>
             </div>
           )}
 

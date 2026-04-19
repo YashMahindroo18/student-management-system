@@ -1,13 +1,13 @@
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
-from app.db.models import Student, Mark
+from app.db.models import Student, Mark, User
+from app.core.security import hash_password
 import random
 
 db: Session = SessionLocal()
 
 subjects = ["Maths", "DBMS", "OS", "CN", "AI", "ML"]
 
-# 🔹 Create students
 for i in range(1, 11):
     email = f"student{i}@example.com"
 
@@ -24,9 +24,19 @@ for i in range(1, 11):
     )
 
     db.add(student)
+
+    # ✅ Create login user
+    user = User(
+        name=f"Student{i}",
+        email=email,
+        hashed_password=hash_password("123456"),
+        role="student"
+    )
+
+    db.add(user)
     db.commit()
 
-    # 🔹 Add marks for 2 semesters
+    # ✅ Add marks
     for sem in [1, 2]:
         for subject in subjects:
             mark = Mark(
