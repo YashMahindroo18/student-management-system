@@ -7,6 +7,7 @@ from app.db.models import Student
 from app.db.models import Mark
 from app.db.models import Timetable
 from app.schemas.timetable import TimetableResponse
+from app.utils.grade import get_grade, get_grade_point
 router = APIRouter()
 
 
@@ -30,16 +31,28 @@ def student_profile(
 
 from app.schemas.mark import MarkResponse
 
-@router.get("/marks/{semester}", response_model=list[MarkResponse])
+@router.get("/marks/{semester}")
 def get_marks(
     semester: int,
     db: Session = Depends(get_db),
     user=Depends(require_role("student"))
 ):
-    return db.query(Mark).filter(
+    marks = db.query(Mark).filter(
         Mark.student_email == user["sub"],
         Mark.semester == semester
     ).all()
+
+    result = []
+
+    for m in marks:
+        result.append({
+            "subject": m.subject,
+            "score": m.score,
+            "grade": get_grade(m.score),
+            "gp": get_grade_point(m.score)
+        })
+
+    return result
 @router.get("/timetable", response_model=list[TimetableResponse])
 def get_timetable(
     db: Session = Depends(get_db),
