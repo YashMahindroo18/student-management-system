@@ -90,44 +90,79 @@ function StudentDashboard() {
     : 0;
 
   return (
-    <div
-  className="min-h-screen bg-cover bg-center"
-  style={{
-    backgroundImage:
-      "url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1')"
-  }}
-> 
-<div className="min-h-screen bg-white/70 backdrop-blur-md">
+    <div className="min-h-screen bg-gray-100">
       <Navbar role="student" />
 
-      <div className="p-6 flex flex-col items-center gap-6">
+      <div className="flex">
 
-        {/* Tabs */}
-        <div className="flex gap-4">
-          {["profile", "marks", "timetable"].map((tab) => (
+        {/* 🔹 SIDEBAR */}
+        <div className="w-64 min-h-screen bg-white shadow-lg p-5">
+          <h2 className="text-xl font-bold mb-6 text-center">
+            🎓 IILM Portal
+          </h2>
+
+          <div className="flex flex-col gap-3">
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-full transition ${
-                activeTab === tab
-                  ? "bg-blue-500 text-white shadow-lg"
-                  : "bg-white shadow hover:bg-gray-100"
+              onClick={() => setActiveTab("profile")}
+              className={`p-3 rounded ${
+                activeTab === "profile"
+                  ? "bg-blue-500 text-white"
+                  : "hover:bg-gray-100"
               }`}
             >
-              {tab === "profile"
-                ? "Profile"
-                : tab === "marks"
-                ? "Marksheet"
-                : "Timetable"}
+              Profile
             </button>
-          ))}
+
+            <button
+              onClick={() => setActiveTab("marks")}
+              className={`p-3 rounded ${
+                activeTab === "marks"
+                  ? "bg-green-500 text-white"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              Marksheet
+            </button>
+
+            <button
+              onClick={() => setActiveTab("timetable")}
+              className={`p-3 rounded ${
+                activeTab === "timetable"
+                  ? "bg-purple-500 text-white"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              Timetable
+            </button>
+          </div>
         </div>
 
-        <div className="w-full max-w-4xl">
+        {/* 🔹 MAIN CONTENT */}
+        <div className="flex-1 p-6">
+
+          {/* 🔥 DASHBOARD CARDS */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+
+            <div className="bg-white shadow rounded p-4 text-center">
+              <p className="text-gray-500">CGPA</p>
+              <h2 className="text-2xl font-bold">{cgpa}</h2>
+            </div>
+
+            <div className="bg-white shadow rounded p-4 text-center">
+              <p className="text-gray-500">Subjects</p>
+              <h2 className="text-2xl font-bold">{marks.length}</h2>
+            </div>
+
+            <div className="bg-white shadow rounded p-4 text-center">
+              <p className="text-gray-500">Semester</p>
+              <h2 className="text-2xl font-bold">{semester}</h2>
+            </div>
+
+          </div>
 
           {/* PROFILE */}
           {activeTab === "profile" && (
-            <div className="bg-white/70 shadow-xl rounded-2xl p-6">
+            <div className="bg-white shadow-xl rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">My Profile</h2>
               <p><b>Email:</b> {data.email}</p>
               <p><b>Roll Number:</b> {data.roll_number}</p>
@@ -224,13 +259,12 @@ function StudentDashboard() {
                 </button>
               </div>
 
-            </div>   /* ✅ FIXED HERE */
-
+            </div>
           )}
 
           {/* TIMETABLE */}
           {activeTab === "timetable" && (
-            <div className="bg-white/70 shadow-xl rounded-2xl p-6">
+            <div className="bg-white shadow-xl rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Weekly Timetable</h2>
 
               <table className="w-full border text-center">
@@ -262,8 +296,6 @@ function StudentDashboard() {
 
         </div>
       </div>
-    </div>
-
     </div>
   );
 }
