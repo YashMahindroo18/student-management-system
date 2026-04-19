@@ -48,7 +48,18 @@ def add_marks(
     db: Session = Depends(get_db),
     user=Depends(require_role("admin"))
 ):
-    mark = Mark(**data.dict())
+    # 🔍 Check student exists
+    student = db.query(Student).filter(Student.email == data.student_email).first()
+
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # ✅ Create mark safely
+    mark = Mark(
+        student_email=data.student_email,
+        subject=data.subject,
+        score=data.score
+    )
 
     db.add(mark)
     db.commit()
