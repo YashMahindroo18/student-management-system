@@ -9,6 +9,8 @@ from app.db.models import Mark
 from app.schemas.mark import MarkCreate, MarkResponse
 from app.db.models import Timetable
 from app.schemas.timetable import TimetableCreate, TimetableResponse
+from app.db.models import User
+from app.core.security import hash_password
 
 router = APIRouter()
 
@@ -106,3 +108,47 @@ def activate_student(
     db.refresh(student)  # ✅ ALSO IMPORTANT
 
     return student
+#temporary
+@router.post("/seed")
+def seed_data(
+    db: Session = Depends(get_db),
+    user=Depends(require_role("admin"))
+):
+    import random
+
+    subjects = ["Maths", "DBMS", "OS", "CN", "AI", "ML"]
+
+    for i in range(1, 11):
+        email = f"student{i}@example.com"
+
+        student = Student(
+            email=email,
+            roll_number=f"CS{i:03}",
+            department="CSE",
+            year=2,
+            is_active=True
+        )
+        db.add(student)
+
+        user_obj = User(
+            name=f"Student{i}",
+            email=email,
+            hashed_password=hash_password("123456"),
+            role="student"
+        )
+        db.add(user_obj)
+        db.commit()
+
+        for sem in [1, 2]:
+            for subject in subjects:
+                mark = Mark(
+                    student_email=email,
+                    subject=subject,
+                    score=random.randint(60, 95),
+                    semester=sem
+                )
+                db.add(mark)
+
+        db.commit()
+
+    return {"message": "Seeded successfully"}
