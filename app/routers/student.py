@@ -102,6 +102,15 @@ from app.db.models import Mark
 from app.utils.grade import get_grade, get_grade_point
 from app.core.security import decode_access_token  # ✅ IMPORTANT
 
+from fastapi import Query, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
+
+from app.db.database import get_db
+from app.db.models import Mark
+from app.utils.grade import get_grade, get_grade_point
+from app.core.security import decode_access_token
+
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib import colors
@@ -113,7 +122,7 @@ import io
 @router.get("/marksheet/pdf/{semester}")
 def download_marksheet(
     semester: int,
-    token: str = Query(...),   # ✅ token from frontend
+    token: str = Query(...),
     db: Session = Depends(get_db)
 ):
     # 🔐 Decode token
@@ -130,19 +139,22 @@ def download_marksheet(
         Mark.semester == semester
     ).all()
 
-    # 📄 Create PDF
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    if not marks:
+        raise HTTPException(status_code=404, detail="No marks found")
 
+    # 📄 Create PDF buffer
+    buffer = io.BytesIO()
+
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
     styles = getSampleStyleSheet()
     elements = []
 
-    # Title
+    # 🔹 Title
     elements.append(Paragraph("IILM University", styles["Title"]))
     elements.append(Paragraph(f"Semester {semester} Marksheet", styles["Heading2"]))
     elements.append(Paragraph(f"Student: {user_email}", styles["Normal"]))
 
-    # Table
+    # 🔹 Table data
     data = [["Subject", "Marks", "Grade", "GP"]]
 
     total_gp = 0
@@ -156,10 +168,11 @@ def download_marksheet(
 
         data.append([m.subject, score, grade, gp])
 
-    sgpa = round(total_gp / len(marks), 2) if marks else 0
+    sgpa = round(total_gp / len(marks), 2)
 
     data.append(["", "", "SGPA", sgpa])
 
+    # 🔹 Table styling
     table = Table(data)
     table.setStyle(TableStyle([
         ("BACKGROUND", (0,0), (-1,0), colors.grey),
@@ -169,6 +182,7 @@ def download_marksheet(
 
     elements.append(table)
 
+    # 🔹 Build PDF
     doc.build(elements)
 
     buffer.seek(0)

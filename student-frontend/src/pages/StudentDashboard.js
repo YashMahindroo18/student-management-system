@@ -95,7 +95,7 @@ function StudentDashboard() {
 
       <div className="p-6 flex flex-col items-center gap-6">
 
-        {/* 🔹 Tabs */}
+        {/* Tabs */}
         <div className="flex gap-4">
           {["profile", "marks", "timetable"].map((tab) => (
             <button
@@ -122,7 +122,6 @@ function StudentDashboard() {
           {activeTab === "profile" && (
             <div className="bg-white/70 shadow-xl rounded-2xl p-6">
               <h2 className="text-xl font-semibold mb-4">My Profile</h2>
-
               <p><b>Email:</b> {data.email}</p>
               <p><b>Roll Number:</b> {data.roll_number}</p>
               <p><b>Department:</b> {data.department}</p>
@@ -142,7 +141,6 @@ function StudentDashboard() {
                 Semester Marksheet
               </p>
 
-              {/* Semester */}
               <div className="mb-4 text-center">
                 <select
                   value={semester}
@@ -154,14 +152,12 @@ function StudentDashboard() {
                 </select>
               </div>
 
-              {/* Info */}
               <div className="mb-4">
                 <p><b>Name:</b> {data.roll_number}</p>
                 <p><b>Email:</b> {data.email}</p>
               </div>
 
-              {/* Table */}
-              <table className="w-full border text-center rounded overflow-hidden">
+              <table className="w-full border text-center">
                 <thead className="bg-purple-200">
                   <tr>
                     <th className="p-2">Subject</th>
@@ -173,7 +169,7 @@ function StudentDashboard() {
 
                 <tbody>
                   {marks.map((m, i) => (
-                    <tr key={i} className="border-t">
+                    <tr key={i}>
                       <td className="p-2">{m.subject}</td>
                       <td className="p-2">{m.score}</td>
                       <td className="p-2">{m.grade}</td>
@@ -183,7 +179,6 @@ function StudentDashboard() {
                 </tbody>
               </table>
 
-              {/* Result */}
               <div className="mt-4 text-right space-y-1">
                 <p><b>Total Marks:</b> {total}</p>
                 <p><b>SGPA:</b> {sgpa}</p>
@@ -193,24 +188,42 @@ function StudentDashboard() {
               {/* PDF BUTTON */}
               <div className="mt-6 flex justify-end">
                 <button
-                  onClick={() => {
-                    const token = localStorage.getItem("token");
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem("token");
 
-                    window.open(
-                      `${API}/student/marksheet/pdf/${semester}?token=${token}`
-                    );
+                      const res = await fetch(
+                        `${API}/student/marksheet/pdf/${semester}?token=${token}`
+                      );
+
+                      const blob = await res.blob();
+
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+
+                      a.href = url;
+                      a.download = `marksheet_sem_${semester}.pdf`;
+
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                    } catch (err) {
+                      alert("Error downloading PDF");
+                    }
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow"
+                  className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow"
                 >
                   Download Marksheet PDF
                 </button>
               </div>
-            </div>
+
+            </div>   /* ✅ FIXED HERE */
+
           )}
 
           {/* TIMETABLE */}
           {activeTab === "timetable" && (
-            <div className="bg-white/70 shadow-xl rounded-2xl p-6 overflow-x-auto">
+            <div className="bg-white/70 shadow-xl rounded-2xl p-6">
               <h2 className="text-xl font-semibold mb-4">Weekly Timetable</h2>
 
               <table className="w-full border text-center">
@@ -226,18 +239,12 @@ function StudentDashboard() {
                 <tbody>
                   {["Monday","Tuesday","Wednesday","Thursday","Friday"].map((day) => (
                     <tr key={day}>
-                      <td className="font-semibold bg-purple-50">{day}</td>
-
+                      <td className="font-semibold">{day}</td>
                       {[1,2,3,4,5,6,7].map((slot) => {
                         const entry = timetable.find(
                           (t) => t.day === day && t.slot === slot
                         );
-
-                        return (
-                          <td key={slot}>
-                            {entry ? entry.subject : "-"}
-                          </td>
-                        );
+                        return <td key={slot}>{entry ? entry.subject : "-"}</td>;
                       })}
                     </tr>
                   ))}
