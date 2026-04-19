@@ -1,19 +1,19 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
+
+
+class StudentCreate(BaseModel):
+    email: str
+    roll_number: str
+    department: str
+    year: int
+
 
 class StudentResponse(BaseModel):
     email: str
     roll_number: str
     department: str
     year: int
+    is_active: bool   # ✅ VERY IMPORTANT
 
     class Config:
-        from_attributes = True
-
-class StudentCreate(BaseModel):
-    email: EmailStr
-    roll_number: str
-    department: str
-    year: int
-class StudentUpdate(BaseModel):
-    department: str
-    year: int
+        from_attributes = True  # for SQLAlchemy compatibility
