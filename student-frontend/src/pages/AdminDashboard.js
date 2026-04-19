@@ -24,10 +24,6 @@ function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [filteredStudents, setFilteredStudents] = useState([]);
 
-  const days = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
-  const slots = [1,2,3,4,5,6,7];
-  const [timetableData, setTimetableData] = useState({});
-
   const navigate = useNavigate();
 
   // 🔹 Fetch students
@@ -103,7 +99,7 @@ function AdminDashboard() {
     }
   };
 
-  // 🔹 Activate student (NEW 🔥)
+  // 🔹 Activate student
   const handleActivateStudent = async (email) => {
     try {
       const token = localStorage.getItem("token");
@@ -165,60 +161,6 @@ function AdminDashboard() {
     }
   };
 
-  // 🔹 Timetable
-  const handleChange = (day, slot, value) => {
-    setTimetableData(prev => ({
-      ...prev,
-      [`${day}-${slot}`]: value
-    }));
-  };
-
-  const handleSaveTimetable = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      for (let day of days) {
-        for (let slot of slots) {
-          const subject = timetableData[`${day}-${slot}`];
-          if (!subject) continue;
-
-          await axios.post(`${API}/admin/timetable`, {
-            year: 2,
-            section: "A",
-            day,
-            slot,
-            subject
-          }, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
-        }
-      }
-
-      alert("Timetable saved!");
-    } catch {
-      alert("Error saving timetable");
-    }
-  };
-
-  const handleClearTimetable = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      await axios.delete(`${API}/admin/timetable`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      alert("Timetable cleared");
-      setTimetableData({});
-    } catch {
-      alert("Error clearing timetable");
-    }
-  };
-
   return (
     <div className="bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 min-h-screen">
       <Navbar role="admin" />
@@ -230,24 +172,39 @@ function AdminDashboard() {
           <h2 className="font-bold mb-3">Create Student</h2>
 
           <div className="grid grid-cols-2 gap-3">
-            <input placeholder="Email" className="border p-2"
+            <input
+              placeholder="Email"
+              className="border p-2 rounded"
               value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
 
-            <input placeholder="Roll Number" className="border p-2"
+            <input
+              placeholder="Roll Number"
+              className="border p-2 rounded"
               value={form.roll_number}
-              onChange={(e) => setForm({ ...form, roll_number: e.target.value })} />
+              onChange={(e) => setForm({ ...form, roll_number: e.target.value })}
+            />
 
-            <input placeholder="Department" className="border p-2"
+            <input
+              placeholder="Department"
+              className="border p-2 rounded"
               value={form.department}
-              onChange={(e) => setForm({ ...form, department: e.target.value })} />
+              onChange={(e) => setForm({ ...form, department: e.target.value })}
+            />
 
-            <input placeholder="Year" className="border p-2"
+            <input
+              placeholder="Year"
+              className="border p-2 rounded"
               value={form.year}
-              onChange={(e) => setForm({ ...form, year: e.target.value })} />
+              onChange={(e) => setForm({ ...form, year: e.target.value })}
+            />
           </div>
 
-          <button onClick={handleCreate} className="mt-3 bg-blue-500 text-white px-4 py-2 rounded">
+          <button
+            onClick={handleCreate}
+            className="mt-3 bg-blue-500 text-white px-4 py-2 rounded"
+          >
             Create Student
           </button>
         </div>
@@ -258,46 +215,70 @@ function AdminDashboard() {
 
           <div className="grid grid-cols-3 gap-3">
 
+            {/* SEARCH */}
             <div className="relative">
               <input
-                placeholder="Search student"
-                className="border p-2 w-full"
+                placeholder="Search student email"
+                className="border p-2 w-full rounded"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
 
-              {filteredStudents.map((s, i) => (
-                <div key={i}
-                  className="p-2 bg-white cursor-pointer hover:bg-gray-100"
-                  onClick={() => {
-                    setMarkForm({ ...markForm, student_email: s.email });
-                    setSearch(s.email);
-                    setFilteredStudents([]);
-                  }}>
-                  {s.email}
+              {filteredStudents.length > 0 && (
+                <div className="absolute bg-white border w-full mt-1 max-h-40 overflow-y-auto shadow rounded z-10">
+                  {filteredStudents.map((s, i) => (
+                    <div
+                      key={i}
+                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        setMarkForm({ ...markForm, student_email: s.email });
+                        setSearch(s.email);
+                        setFilteredStudents([]);
+                      }}
+                    >
+                      {s.email}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
 
-            <input placeholder="Subject" className="border p-2"
+            <input
+              placeholder="Subject"
+              className="border p-2 rounded"
               value={markForm.subject}
-              onChange={(e) => setMarkForm({ ...markForm, subject: e.target.value })} />
+              onChange={(e) =>
+                setMarkForm({ ...markForm, subject: e.target.value })
+              }
+            />
 
-            <input placeholder="Score" className="border p-2"
+            <input
+              placeholder="Score"
+              className="border p-2 rounded"
               value={markForm.score}
-              onChange={(e) => setMarkForm({ ...markForm, score: e.target.value })} />
+              onChange={(e) =>
+                setMarkForm({ ...markForm, score: e.target.value })
+              }
+            />
           </div>
 
-          <button onClick={handleAddMarks} className="mt-3 bg-green-500 text-white px-4 py-2 rounded">
+          <p className="text-sm text-gray-600 mt-2">
+            Selected: {markForm.student_email || "None"}
+          </p>
+
+          <button
+            onClick={handleAddMarks}
+            className="mt-3 bg-green-500 text-white px-4 py-2 rounded"
+          >
             Add Marks
           </button>
         </div>
 
-        {/* STUDENT LIST WITH ACTIVATION */}
+        {/* STUDENT LIST */}
         <div className="bg-white/70 p-4 rounded-xl shadow">
           <h2 className="font-bold mb-3">Students</h2>
 
-          <table className="w-full text-center border">
+          <table className="w-full border text-center">
             <thead>
               <tr className="bg-gray-200">
                 <th>Email</th>
@@ -317,7 +298,7 @@ function AdminDashboard() {
                   <td>{s.year}</td>
                   <td>
                     {s.is_active ? (
-                      <span className="text-green-600">Active</span>
+                      <span className="text-green-600 font-semibold">Active</span>
                     ) : (
                       <button
                         onClick={() => handleActivateStudent(s.email)}
