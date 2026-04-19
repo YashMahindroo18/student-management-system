@@ -7,7 +7,7 @@ const API = process.env.REACT_APP_API_URL;
 
 function StudentDashboard() {
   const [data, setData] = useState(null);
-  const [marks, setMarks] = useState([]); // ✅ correct placement
+  const [marks, setMarks] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,9 +41,7 @@ function StudentDashboard() {
         });
 
         setMarks(res.data);
-      } catch (err) {
-        console.log(err.response);
-      }
+      } catch {}
     };
 
     fetchProfile();
@@ -53,32 +51,44 @@ function StudentDashboard() {
   if (!data) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
       <Navbar role="student" />
 
       <div className="p-6 flex flex-col items-center gap-6">
 
-        {/* PROFILE */}
-        <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
-          <h2 className="text-xl font-bold mb-4">My Profile</h2>
+        {/* PROFILE CARD */}
+        <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6 w-full max-w-md">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            My Profile
+          </h2>
 
-          <p><b>Email:</b> {data.email}</p>
-          <p><b>Roll Number:</b> {data.roll_number}</p>
-          <p><b>Department:</b> {data.department}</p>
-          <p><b>Year:</b> {data.year}</p>
+          <div className="space-y-2 text-gray-600">
+            <p><b>Email:</b> {data.email}</p>
+            <p><b>Roll Number:</b> {data.roll_number}</p>
+            <p><b>Department:</b> {data.department}</p>
+            <p><b>Year:</b> {data.year}</p>
+          </div>
         </div>
 
-        {/* MARKS */}
-        <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
-          <h2 className="text-xl font-bold mb-4">My Marks</h2>
+        {/* MARKS CARD */}
+        <div className="bg-white/70 backdrop-blur-md shadow-xl rounded-2xl p-6 w-full max-w-md">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            My Marks
+          </h2>
 
           {marks.length === 0 ? (
-            <p>No marks available</p>
+            <p className="text-gray-500">No marks available</p>
           ) : (
-            <ul>
+            <ul className="space-y-2">
               {marks.map((m, i) => (
-                <li key={i}>
-                  {m.subject} - {m.score}
+                <li
+                  key={i}
+                  className="flex justify-between bg-white p-2 rounded-lg shadow-sm"
+                >
+                  <span>{m.subject}</span>
+                  <span className="font-semibold text-blue-500">
+                    {m.score}
+                  </span>
                 </li>
               ))}
             </ul>
