@@ -14,29 +14,37 @@ function Activate() {
         password,
       });
 
-      alert("Account activated!");
+      alert("Account activated! Now login.");
     } catch (err) {
-      console.log(err.response);
-      alert(err.response?.data?.detail || "Activation failed");
+      alert(err.response?.data?.detail || "Error");
     }
   };
 
   return (
-    <div>
-      <h2>Activate Account</h2>
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-pink-100 to-purple-100">
+      <div className="bg-white p-6 rounded-xl shadow-md w-80">
+        <h2 className="text-xl font-bold mb-4 text-center">Activate Account</h2>
 
-      <input
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <input
+          className="border p-2 w-full mb-3 rounded"
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <input
+          className="border p-2 w-full mb-3 rounded"
+          type="password"
+          placeholder="Set Password"
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      <button onClick={handleActivate}>Activate</button>
+        <button
+          onClick={handleActivate}
+          className="bg-purple-500 text-white w-full py-2 rounded"
+        >
+          Activate
+        </button>
+      </div>
     </div>
   );
 }

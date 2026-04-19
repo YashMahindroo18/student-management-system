@@ -9,6 +9,7 @@ from app.core.security import hash_password, verify_password, create_access_toke
 router = APIRouter()
 
 
+# ✅ CREATE ADMIN
 @router.get("/create-admin")
 def create_admin(db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == "admin@example.com").first()
@@ -29,7 +30,7 @@ def create_admin(db: Session = Depends(get_db)):
     return {"message": "Admin created"}
 
 
-# ✅ FIXED ACTIVATION
+# ✅ ACTIVATE STUDENT (SET PASSWORD HERE)
 @router.post("/activate")
 def activate_account(data: ActivateUser, db: Session = Depends(get_db)):
     student = db.query(Student).filter(Student.email == data.email).first()
@@ -38,7 +39,7 @@ def activate_account(data: ActivateUser, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Student not found")
 
     if student.is_active:
-        raise HTTPException(status_code=400, detail="Account already activated")
+        raise HTTPException(status_code=400, detail="Already activated")
 
     existing_user = db.query(User).filter(User.email == student.email).first()
     if existing_user:
@@ -52,14 +53,17 @@ def activate_account(data: ActivateUser, db: Session = Depends(get_db)):
     )
 
     db.add(user)
+
+    # ✅ mark student active
     student.is_active = True
+
     db.commit()
     db.refresh(user)
 
     return {"message": "Account activated successfully"}
 
 
-# ✅ FIXED LOGIN
+# ✅ LOGIN
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
@@ -67,7 +71,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     if not db_user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    # 🔹 Only check activation for students
+    # 🔒 check activation only for students
     if db_user.role == "student":
         student = db.query(Student).filter(Student.email == user.email).first()
 

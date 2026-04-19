@@ -20,6 +20,7 @@ class Student(Base):
     roll_number = Column(String, unique=True)
     department = Column(String)
     year = Column(Integer)
+    password_hash = Column(String)
     is_active = Column(Boolean, default=False)
 class Mark(Base):
     __tablename__ = "marks"
