@@ -11,10 +11,7 @@ app = FastAPI()
 # ✅ CORS CONFIG (VERY IMPORTANT)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://student-management-system-theta-henna.vercel.app"
-    ],
+    allow_origins=["*"],   # 👈 TEMP FIX
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
